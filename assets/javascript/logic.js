@@ -49,6 +49,7 @@ var playerData = {
     wins: {
         myWins: 0,
         opponentWins: 0,
+        ties: 0
     },
 
     opponentName: null
@@ -71,7 +72,7 @@ $(document).ready(function() {
     $('#start').on('click', function(event) {
         event.preventDefault();
         addName();
-        
+
     });
 
 
@@ -115,7 +116,7 @@ function addName() {
         $('.player-signin').html("<h6>Hi " + sv.player1.name + "! You are player 1");
         $('#player1-name').html(sv.player1.name);
         player2OpponentSet();
-        $('#player2-name').html(playerData.opponentName);
+
     } else if (($('#name-input').val() !== "") && (sv.player1.name != playerData.player1.name) && (sv.player2.name === 1)) {
         playerData.player2.name = $('#name-input').val().trim();
         console.log('name input of player two is' + $('#name-input').val().trim());
@@ -144,6 +145,7 @@ function player2OpponentSet() {
         playerData.player2.name = sv.player2.name;
         playerData.opponentName = sv.player2.name;
         console.log('local opponent name (2) is ' + playerData.opponentName);
+        $('#player2-name').html(playerData.opponentName);
         playersTogether();
     } else {
         setTimeout(player2OpponentSet, 500);
@@ -154,23 +156,53 @@ function playersTogether() {
     if (playerData.opponentName !== null) {
         console.log('opponent is ' + playerData.opponentName);
         startGame();
-        
-    } 
+        console.log("I win this amount:" + playerData.wins.myWins);
+		console.log("My opponent wins this amount:" + playerData.wins.opponentWins);
+
+    }
 }; // end playersTogether
 
 
 
-function startGame () {
-	if ((sv.player1.name !== 1) && (sv.player2.name !== 1)) {
+function startGame() {
+    if ((sv.player1.name !== 1) && (sv.player2.name !== 1)) {
 
-		 for (i=0; i < choicesArray.length; i++){
-		 	$('#player1-selection').append('<p>' + choicesArray[i] +'</p>');
-		 	$('#player2-selection').append('<p>' + choicesArray[i] +'</p>');
-		 
-	} 
-} else {
-	console.log(error);
-}
+        $('#player1-selection').append('<p><button id ="selection" value="rock">' + choicesArray[0] + '</button></p>');
+        $('#player1-selection').append('<p><button id ="selection" value="paper">' + choicesArray[1] + '</button></p>');
+        $('#player1-selection').append('<p><button id ="selection" value="scissors">' + choicesArray[2] + '</button></p>');
+        $('#player2-selection').append('<p><button id ="selection" value="rock">' + choicesArray[0] + '</button></p>');
+        $('#player2-selection').append('<p><button id ="selection" value="paper">' + choicesArray[1] + '</button></p>');
+        $('#player2-selection').append('<p><button id ="selection" value="scissors">' + choicesArray[2] + '</button></p>');
 
-};
+        $('#selection').on('click', function(event) {
 
+            playerOneChoice = $('#selection').val();
+            playerTwoChoice = $('#selection').val();
+
+
+            if ((playerOneChoice === "rock") || (playerOneChoice === "paper") || (playerOneChoice === "scissors")) {
+
+                // This logic determines the outcome of the game (win/loss/tie), and increments the appropriate counter.
+                if ((playerOneChoice === "rock") && (playerTwoChoice === "scissors")) {
+                    playerData.wins.myWins++;
+                } else if ((playerOneChoice === "rock") && (playerTwoChoice === "paper")) {
+                    playerData.wins.opponentWins++;
+                } else if ((playerOneChoice === "scisssors") && (playerTwoChoice === "rock")) {
+                    playerData.wins.opponentWins++;
+                } else if ((playerOneChoice === "scissors") && (playerTwoChoice === "paper")) {
+                    playerData.wins.myWins++;
+                } else if ((playerOneChoice === "paper") && (playerTwoChoice === "rock")) {
+                    playerData.wins.myWins++;
+                } else if ((playerOneChoice === "paper") && (playerTwoChoice === "scissors")) {
+                    playerData.wins.opponentWins++;
+                } else if (playerOneChoice === playerTwoChoice) {
+                    playerData.wins.ties++;
+                }
+            }
+
+        })
+
+
+    } else {
+        console.log(error);
+    }};
