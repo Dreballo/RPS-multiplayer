@@ -12,12 +12,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Unique Style Sheet -->
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-    <!--jQuery CDN -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  
     <!-- Firebase Database -->
     <script src="https://www.gstatic.com/firebasejs/3.7.1/firebase.js"></script>
-    <!-- Game Logic Javascript -->
-    <script type="text/javascript" src="assets/javascript/logic.js"></script>
+   
 </head>
 
 <body>
@@ -30,9 +28,9 @@
             <form class="form-inline player-signin">
                 <div class="form-group">
                     <label for="exampleInputName2">Name</label>
-                    <input type="text" class="form-control" id="name-input" placeholder="Jane Doe">
+                    <input type="text" class="form-control" id="name-input" placeholder="Your Name">
                 </div>
-                <button type="submit" class="btn btn-default" id="submit">Start</button>
+                <button type="submit" class="btn btn-default" id="start">Start</button>
             </form>
         </div>
         <div class="col-lg-4 col-lg-offset-4" id="player-greeting"></div>
@@ -43,16 +41,20 @@
         <div class="col-lg-12" id="game-container">
             <div class="row">
                 <div class="col-lg-4 panel panel-default" id="status-player1">
-                    <h4><span id="player1-name"></span></h4>
-                    <h2><span id="player1-selection"></span></h2>
-                    <p>Wins:<span id="player1-wins"></span>Losses:<span id="player2-losses"></span></p>
+                    <h3><span id="player1-name">Waiting for Player 1</span></h3>
+                    <br>
+                    <h4><span id="player1-selection"></span></h4>
+                    <br>
+                    <p>Wins:<span id="player1-wins"></span>Losses:<span id="player1-losses"></span></p>
                 </div>
                 <div class="col-lg-4 panel panel-default" id="round-results">
                     <h2><span id="display-winner"></span></h2>
                 </div>
                 <div class="col-lg-4 panel panel-default" id="status-player2">
-                    <h4><span id="player2-name"></span></h4>
-                    <h2><span id="player2-selection"></span></h2>
+                    <h3><span id="player2-name">Waiting for Player 2</span></h3>
+                    <br>
+                    <h4><span id="player2-selection"></span></h4>
+                    <br>
                     <p>Wins:<span id="player2-wins"></span>Losses:<span id="player2-losses"></span></p>
                 </div>
             </div>
@@ -71,6 +73,13 @@
             </div>
         </div>
     </div>
+
+  <!--jQuery CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+ <!-- Game Logic Javascript -->
+    <script type="text/javascript" src="assets/javascript/logic.js"></script>
+
+
 </body>
 
 </html>
