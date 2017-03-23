@@ -44,7 +44,10 @@ var playerData = {
         name: 1,
         play: 1
     },
-
+    plays: {
+        myPlay: 1,
+        opponentPlay: 1
+    },
 
     wins: {
         myWins: 0,
@@ -54,7 +57,7 @@ var playerData = {
 
     opponentName: null
 
-}
+};
 
 //Array for game choices
 var choicesArray = ['Rock', 'Paper', 'Scissors'];
@@ -77,7 +80,7 @@ $(document).ready(function() {
 
 
 
-})
+});
 
 //Set up database at start of the game
 
@@ -91,8 +94,8 @@ function start() {
             name: 1,
             play: 1
         }
-    })
-};
+    });
+}
 
 
 //Sets Player 1 and Player 2 
@@ -131,13 +134,13 @@ function addName() {
         playerData.player2.name = sv.player2.name;
         $('#name-input').val('');
         console.log('name of firebase player2 is' + sv.player2.name);
-        playerData.opponentName = sv.player1.name
-        $('#player1-name').html(playerData.opponentName);
+        playerData.opponentName = sv.player1.name;
+        $('#player2-name').html(playerData.opponentName);
         $('.player-signin').html("<h6>Hi " + playerData.player2.name + "! You are player 2");
-        $('#player2-name').html(sv.player2.name);
+        $('#player1-name').html(sv.player2.name);
         playersTogether();
     }
-};
+}
 
 
 function player2OpponentSet() {
@@ -150,59 +153,121 @@ function player2OpponentSet() {
     } else {
         setTimeout(player2OpponentSet, 500);
     }
-}; // player2OpponentSet
+} // player2OpponentSet
 
 function playersTogether() {
     if (playerData.opponentName !== null) {
         console.log('opponent is ' + playerData.opponentName);
         startGame();
-        console.log("I win this amount:" + playerData.wins.myWins);
-		console.log("My opponent wins this amount:" + playerData.wins.opponentWins);
+
 
     }
-}; // end playersTogether
+} // end playersTogether
 
 
 
 function startGame() {
     if ((sv.player1.name !== 1) && (sv.player2.name !== 1)) {
 
-        $('#player1-selection').append('<p><button id ="selection" value="rock">' + choicesArray[0] + '</button></p>');
-        $('#player1-selection').append('<p><button id ="selection" value="paper">' + choicesArray[1] + '</button></p>');
-        $('#player1-selection').append('<p><button id ="selection" value="scissors">' + choicesArray[2] + '</button></p>');
-        $('#player2-selection').append('<p><button id ="selection" value="rock">' + choicesArray[0] + '</button></p>');
-        $('#player2-selection').append('<p><button id ="selection" value="paper">' + choicesArray[1] + '</button></p>');
-        $('#player2-selection').append('<p><button id ="selection" value="scissors">' + choicesArray[2] + '</button></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-primary">' + choicesArray[0] +'</div></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-danger">' + choicesArray[1] +'</div></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-success">' + choicesArray[2] +'</div></p>');
 
-        $('#selection').on('click', function(event) {
+        $('.btn-primary').attr('data-type','rock');
+        $('.btn-danger').attr('data-type','paper');
+        $('.btn-success').attr('data-type','scissors');
 
-            playerOneChoice = $('#selection').val();
-            playerTwoChoice = $('#selection').val();
+        $('.btn').on('click', function(event) {
+
+            makeMove();
+
+        });
+
+    }
+}
 
 
-            if ((playerOneChoice === "rock") || (playerOneChoice === "paper") || (playerOneChoice === "scissors")) {
-
-                // This logic determines the outcome of the game (win/loss/tie), and increments the appropriate counter.
-                if ((playerOneChoice === "rock") && (playerTwoChoice === "scissors")) {
-                    playerData.wins.myWins++;
-                } else if ((playerOneChoice === "rock") && (playerTwoChoice === "paper")) {
-                    playerData.wins.opponentWins++;
-                } else if ((playerOneChoice === "scisssors") && (playerTwoChoice === "rock")) {
-                    playerData.wins.opponentWins++;
-                } else if ((playerOneChoice === "scissors") && (playerTwoChoice === "paper")) {
-                    playerData.wins.myWins++;
-                } else if ((playerOneChoice === "paper") && (playerTwoChoice === "rock")) {
-                    playerData.wins.myWins++;
-                } else if ((playerOneChoice === "paper") && (playerTwoChoice === "scissors")) {
-                    playerData.wins.opponentWins++;
-                } else if (playerOneChoice === playerTwoChoice) {
-                    playerData.wins.ties++;
-                }
+function makeMove(event) {
+    playerData.plays.myPlay = $('.btn').data('type');
+    console.log('myPlay is ' + playerData.plays.myPlay);
+    $('#selction').html('<h2>' + playerData.plays.myPlay + '</h2>');
+    if ((playerData.opponentName === sv.player2.name) && (sv.player1.play === 1)) {
+        console.log('player 1 set play value in firebase');
+        playerData.player1.play = playerData.plays.myPlay;
+        database.ref().update({
+            player1: {
+                name: sv.player1.name,
+                play: playerData.player1.play
             }
+        }); // end firebase update data.player1.play
+        console.log('set player1 play complete.  playerData.plays.myPlay for player 1 is "' + playerData.plays.myPlay + '" and sv.player1.play is "' + sv.player1.play + '"');
+        setLocalOpponent1Play();
+    } else if ((playerData.opponentName === sv.player1.name) && (sv.player2.play === 1)) {
+        console.log('player2 set play value in firebase');
+        playerData.player2.play = playerData.plays.myPlay;
+        database.ref().update({
+            player2: {
+                name: sv.player2.name,
+                play: playerData.player2.play
+            }
+        }); // end firebase update data.player2.play
+        console.log('set player2 play complete.  playerData.plays.myPlay for player2 is "' + playerData.plays.myPlay + '" and data.player2.play is "' + sv.player2.play + '"');
+        setLocalOpponent2Play();
+    }
+}
 
-        })
-
-
+function setLocalOpponent1Play() {
+    if (sv.player2.play !== 1) {
+        console.log('player1 set opponent play value locally');
+        playerData.player2.play = sv.player2.play;
+        playerData.plays.opponentPlay = playerData.player2.play;
+        $('#player1-').html('<img class="battle-img" src="img/' + playerData.plays.opponentPlay + '.jpg" alt="Your opponent played ' + playerData.plays.opponentPlay + '" />');
+        $('.opponent-move-caption').html('<span>' + playerData.plays.opponentPlay + '</span>');
+        setTimeout(findWinner, 3000);
     } else {
-        console.log(error);
-    }};
+        setTimeout(setLocalOpponent1Play, 500);
+    }
+} // end set local opponent 1 play
+function setLocalOpponent2Play() {
+    if (sv.player1.play !== 1) {
+        console.log('player2 set opponent play value locally');
+        playerData.player1.play = sv.player1.play;
+        playerData.plays.opponentPlay = playerData.player1.play;
+        setTimeout(findWinner, 3000);
+    } else {
+        setTimeout(setLocalOpponent2Play, 500);
+    } // end else if set opponent values
+} // end set local opponent values
+
+
+function findWinner() {
+
+    if (playerData.plays.opponentPlay === playerData.plays.myPlay) {
+        $('#display-winner').html('You Tied');
+        playerData.wins.ties++;
+        console.log('ties is ' + playerData.wins.ties);
+    } else if ((playerData.plays.myPlay == 'rock' && playerData.plays.opponentPlay == 'scissors') || (playerData.plays.myPlay == 'scissors' && playerData.plays.opponentPlay == 'paper') || (playerData.plays.myPlay == 'paper' && playerData.plays.opponentPlay == 'rock')) {
+        $('#display-winner').html('<span>' + playerData.plays.myPlay + ' beats ' + playerData.plays.opponentPlay + '.  you win!</span>');
+        playerData.wins.myWins++;
+        console.log('myWins is ' + playerData.wins.myWins);
+    } else {
+        $('#display-winner').html('<span>' + playerData.plays.opponentPlay + ' beats ' + playerData.plays.myPlay + '.  you lose!</span>');
+        playerData.wins.opponentWins++;
+        console.log('opponentWins is ' + playerData.wins.opponentWins);
+    } // end reckoning game logic
+    setTimeout(setNext, 3000);
+} // end reckoning
+
+function setNext() {
+
+    database.ref().update({
+        player1: {
+            name: sv.player1.name,
+            play: 1
+        },
+        player2: {
+            name: sv.player2.name,
+            play: 1
+        }
+    });
+}
