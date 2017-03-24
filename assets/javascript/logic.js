@@ -38,11 +38,13 @@ var sv;
 var playerData = {
     player1: {
         name: 1,
-        play: 1
+        play: 1,
+        message: null
     },
     player2: {
         name: 1,
-        play: 1
+        play: 1,
+        message: null
     },
     plays: {
         myPlay: 1,
@@ -53,6 +55,10 @@ var playerData = {
         myWins: 0,
         opponentWins: 0,
         ties: 0
+    },
+    messages: {
+        myMsg: null,
+        opponentMsg: null
     },
 
     opponentName: null
@@ -75,6 +81,7 @@ $(document).ready(function() {
     $('#start').on('click', function(event) {
         event.preventDefault();
         addName();
+        talkTrash();
 
     });
 
@@ -88,11 +95,13 @@ function start() {
     database.ref().set({
         player1: {
             name: 1,
-            play: 1
+            play: 1,
+            message: 1
         },
         player2: {
             name: 1,
-            play: 1
+            play: 1,
+            message: 1
         }
     });
 }
@@ -109,7 +118,8 @@ function addName() {
         database.ref().update({
             player1: {
                 name: playerData.player1.name,
-                play: 1
+                play: 1,
+                message: 1
             }
         }); //end of firebase statment
         //playerData.player1.name = sv.player1.name;
@@ -128,7 +138,8 @@ function addName() {
         database.ref().update({
             player2: {
                 name: playerData.player2.name,
-                play: 1
+                play: 1,
+                message: 1
             }
         }); //end of firebase statement
         playerData.player2.name = sv.player2.name;
@@ -169,26 +180,29 @@ function playersTogether() {
 function startGame() {
     if ((sv.player1.name !== 1) && (sv.player2.name !== 1)) {
 
-        $('#player1-selection').append('<p><div class ="btn btn-primary">' + choicesArray[0] +'</div></p>');
-        $('#player1-selection').append('<p><div class ="btn btn-danger">' + choicesArray[1] +'</div></p>');
-        $('#player1-selection').append('<p><div class ="btn btn-success">' + choicesArray[2] +'</div></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-primary">' + choicesArray[0] + '</div></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-danger">' + choicesArray[1] + '</div></p>');
+        $('#player1-selection').append('<p><div class ="btn btn-success">' + choicesArray[2] + '</div></p>');
 
-        $('.btn-primary').attr('data-type','rock');
-        $('.btn-danger').attr('data-type','paper');
-        $('.btn-success').attr('data-type','scissors');
+        $('.btn-primary').attr('data-type', 'rock');
+        $('.btn-danger').attr('data-type', 'paper');
+        $('.btn-success').attr('data-type', 'scissors');
 
         $('.btn').on('click', function(event) {
 
-            makeMove();
+            // Capture the data attribute of the button that was clicked by using this keyword.
+            var myPlay = $(this).attr('data-type');
 
+            // Pass the value of that to your makeMove function call so that you can use it in that function.
+            makeMove(myPlay);
         });
 
     }
 }
 
 
-function makeMove(event) {
-    playerData.plays.myPlay = $('.btn').data('type');
+function makeMove(myPlay) {
+    playerData.plays.myPlay = myPlay;
     console.log('myPlay is ' + playerData.plays.myPlay);
     $('#selction').html('<h2>' + playerData.plays.myPlay + '</h2>');
     if ((playerData.opponentName === sv.player2.name) && (sv.player1.play === 1)) {
@@ -249,10 +263,14 @@ function findWinner() {
     } else if ((playerData.plays.myPlay == 'rock' && playerData.plays.opponentPlay == 'scissors') || (playerData.plays.myPlay == 'scissors' && playerData.plays.opponentPlay == 'paper') || (playerData.plays.myPlay == 'paper' && playerData.plays.opponentPlay == 'rock')) {
         $('#display-winner').html('<span>' + playerData.plays.myPlay + ' beats ' + playerData.plays.opponentPlay + '.  you win!</span>');
         playerData.wins.myWins++;
+        $('#player1-wins').html(playerData.wins.myWins);
+        $('#player2-losses').html(playerData.wins.myWins);
         console.log('myWins is ' + playerData.wins.myWins);
     } else {
         $('#display-winner').html('<span>' + playerData.plays.opponentPlay + ' beats ' + playerData.plays.myPlay + '.  you lose!</span>');
         playerData.wins.opponentWins++;
+        $('#player1-losses').html(playerData.wins.opponentWins);
+        $('#player2-wins').html(playerData.wins.opponentWins);
         console.log('opponentWins is ' + playerData.wins.opponentWins);
     } // end reckoning game logic
     setTimeout(setNext, 3000);
@@ -263,11 +281,71 @@ function setNext() {
     database.ref().update({
         player1: {
             name: sv.player1.name,
-            play: 1
+            play: 1,
+            message: 1
         },
         player2: {
             name: sv.player2.name,
-            play: 1
+            play: 1,
+            message: 1
         }
     });
+
+    $('#display-winner').html('Next Round');
+}
+
+//Functions to send and receive messages
+function talkTrash() {
+    if ((sv.player1.name !== 1) && (sv.player2.name !== 1)) {
+        $('#message-display').prepend('<p>' + sv.player1.name + " and " + sv.player2.name + " have entered the game room. Let\'s get ready to rumble!</p>");
+    } ;
+
+    $('#send-message').on('click', function(event) {
+
+    	event.preventDefault();
+
+        if (playerData.opponentName === sv.player2.name) {
+
+            playerData.player1.message = $('#chat-input').val().trim();
+            database.ref().update({
+                player1: {
+                	name: sv.player1.name,
+                	play: playerData.player1.play,
+                    message: playerData.player1.message
+                }
+            });
+            var $p = $('<p>');
+            $p.css('color', 'blue');
+            $p.text(sv.player1.name + ": " + sv.player1.message);
+            $('#message-display').prepend($p);
+        } else if ((playerData.opponentName === sv.player1.name) && (playerData.player1.message === sv.player1.message)){
+
+        	$p.css('color', 'red');
+            $p.text(sv.player1.name + ": " + sv.player1.message);
+            $('#message-display').prepend($p);
+
+        } else if (playerData.opponentName === sv.player1.name){
+            
+            playerData.player2.message = $('#chat-input').val().trim();
+            database.ref().update({
+                player2: {
+                    name: sv.player2.name,
+                	play: playerData.player2.play,
+                    message: playerData.player2.message
+                }
+            });
+            var $p = $('<p>');
+            $p.css('color', 'blue');
+            $p.text(sv.player2.name + ": " + sv.player2.message);
+            $('#message-display').prepend($p);
+        } else if ((playerData.opponentName === sv.player2.name) && (playerData.player2.message === sv.player2.message)){
+
+        	$p.css('color', 'red');
+            $p.text(sv.player2.name + ": " + sv.player2.message);
+            $('#message-display').prepend($p);
+
+        }
+       
+    });
+
 }
